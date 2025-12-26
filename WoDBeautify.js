@@ -4,7 +4,7 @@
 // @description  美化一下老旧的WoD网站页面
 // @namespace    lunzhiPenxil
 // @license      AGPL3
-// @version      2025.12.27.6
+// @version      2025.12.27.7
 // @include      http*://*.world-of-dungeons.org/*
 // @grant        GM_addStyle
 // @run-at       document-end
