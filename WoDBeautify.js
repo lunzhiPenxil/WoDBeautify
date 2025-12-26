@@ -3,8 +3,9 @@
 // @icon         http://info.world-of-dungeons.org/wod/css/WOD.gif
 // @description  美化一下老旧的WoD网站页面
 // @namespace    lunzhiPenxil
+// @repository   https://github.com/lunzhiPenxil/WoDBeautify
 // @license      AGPL3
-// @version      2025.12.27.7
+// @version      2025.12.27.8
 // @include      http*://*.world-of-dungeons.org/*
 // @grant        GM_addStyle
 // @run-at       document-end
