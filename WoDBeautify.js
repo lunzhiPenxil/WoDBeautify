@@ -5,7 +5,7 @@
 // @namespace    lunzhiPenxil
 // @repository   https://github.com/lunzhiPenxil/WoDBeautify
 // @license      AGPL3
-// @version      2025.12.27.8
+// @version      2025.12.28.1
 // @include      http*://*.world-of-dungeons.org/*
 // @grant        GM_addStyle
 // @run-at       document-end
@@ -59,7 +59,7 @@
             width: 100%;
             height: 100%;
             background-color: transparent;
-            transition: background-color 0.3s ease;
+            transition: background-color 300ms ease;
             z-index: -1;
             pointer-events: none;
         }
@@ -196,16 +196,53 @@
             padding-left: 0;
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.4s ease, padding 0.3s ease;
+            transition: max-height 400ms ease, padding 300ms ease;
         }
 
         #gadgettable-left .gadget_scroll .menu-vertical .menu-1:has(.menu-1-caption.selected) .menu-1-body {
             max-height: 700px;
-            padding: 8px;
+            padding-left: 8px;
         }
 
-        .menu-1-arrow.open, .menu-2-arrow.closed.open {
+        .menu-1-arrow,
+        .menu-2-arrow {
+            display: none; /* 暂时禁用原生的下拉菜单箭头 */
+        }
+
+        .menu-2 .menu-2-body {
+            display: block !important; /* 原生的逻辑在这块有问题，这里强制展示 */
+        }
+
+        .menu-1-arrow.open,
+        .menu-2-arrow.closed.open {
             background: url(https://delta.world-of-dungeons.org/wod/css//skins/skin-8/images/page/navigate_down.png) no-repeat;
+        }
+
+        .menu-1,
+        .menu-2 {
+            position: relative !important;
+        }
+
+        :is(
+            .menu-1:has(.menu-1-body),
+            .menu-2:has(.menu-2-body)
+        )::after {
+            position: absolute;
+            display: block;
+            content: "";
+            background: url(https://delta.world-of-dungeons.org/wod/css//skins/skin-8/images/page/navigate_right.png) no-repeat;
+            top: 5px;
+            right: 8px;
+            height: 16px;
+            width: 16px;
+            transition: transform 300ms cubic-bezier(0, 0, 0, 2);
+        }
+
+        :is(
+            .menu-1:has(.menu-1-body):has(.menu-1-caption.selected),
+            .menu-2:has(.menu-2-body):has(.menu-2-caption) /* 前面已经强制全部情况都是展开了，所以这里也是 */
+        )::after {
+            transform: rotate(90deg);
         }
 
         /* == 顶部菜单栏 == */
