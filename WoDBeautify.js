@@ -5,7 +5,7 @@
 // @namespace    lunzhiPenxil
 // @repository   https://github.com/lunzhiPenxil/WoDBeautify
 // @license      AGPL3
-// @version      2025.12.28.4
+// @version      2025.12.28.5
 // @include      http*://*.world-of-dungeons.org/*
 // @grant        GM_addStyle
 // @grant        GM_getValue
@@ -22,8 +22,7 @@
         enableBaseTransition: true,
         enableLinkUnderline: true,
         enableLeftMenu: true,
-        enableTopMenu: true,
-        enableTableRowHover: false
+        enableTopMenu: true
     };
 
     // 加载设置
@@ -127,8 +126,7 @@
             enableBaseTransition: '基础特效',
             enableLinkUnderline: '超链接下划线特效',
             enableLeftMenu: '左侧菜单特效',
-            enableTopMenu: '顶部菜单栏现代化',
-            enableTableRowHover: '表格行悬停特效'
+            enableTopMenu: '顶部菜单栏现代化'
         };
         return labels[key] || key;
     }
@@ -139,56 +137,6 @@
             /* == 基础过渡 == */
             * {
                 transition: all 300ms;
-            }
-        `,
-
-        tableRowHover: /*css*/ `
-            /* == 表格行高度过渡 == */
-            .content_table * {
-                transition: all 300ms;
-            }
-
-            #gadgettable-center .content_table tr[class^="row"] {
-                position: relative;
-                transition: background-color 300ms ease;
-            }
-
-            #gadgettable-center .content_table tr[class^="row"] td > :is(a, div, span) {
-                display: inline-block;
-                padding-top: 0 !important;
-                padding-bottom: 0 !important;
-                overflow: hidden !important;
-                transition: all 400ms cubic-bezier(0, 0, 0, 2) !important;
-                transition-property: max-height, padding-top, padding-bottom, opacity !important;
-                vertical-align: top;
-                box-sizing: border-box !important;
-            }
-
-            #gadgettable-center:not(:has(input[name="report_id[0]"])) .content_table tr[class^="row"]:is(:hover, .expanded) td > :is(a, div, span) {
-                max-height: 120px !important;
-                padding-top: 8px !important;
-                padding-bottom: 8px !important;
-            }
-
-            #gadgettable-center .content_table tr[class^="row"] td {
-                position: relative;
-            }
-
-            #gadgettable-center .content_table tr[class^="row"] td::after {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: transparent;
-                transition: background-color 300ms ease;
-                z-index: -1;
-                pointer-events: none;
-            }
-
-            #gadgettable-center .content_table tr[class^="row"]:hover td::after {
-                background-color: rgba(102, 126, 234, 0.05);
             }
         `,
 
@@ -414,10 +362,6 @@
         
         if (settings.enableBaseTransition) {
             css += cssFragments.baseTransition;
-        }
-        
-        if (settings.enableTableRowHover) {
-            css += cssFragments.tableRowHover;
         }
         
         if (settings.enableLinkUnderline) {
