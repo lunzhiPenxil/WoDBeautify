@@ -5,7 +5,7 @@
 // @namespace    lunzhiPenxil
 // @repository   https://github.com/lunzhiPenxil/WoDBeautify
 // @license      AGPL3
-// @version      2025.12.28.3
+// @version      2025.12.28.4
 // @include      http*://*.world-of-dungeons.org/*
 // @grant        GM_addStyle
 // @grant        GM_getValue
@@ -42,7 +42,6 @@
         }
         // 重新加载CSS
         applyStyles(settings);
-        alert('设置已保存，页面将重新应用样式！');
     }
 
     // 显示设置对话框
@@ -56,7 +55,9 @@
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                background: #1a1a1a;
+                background: #1a1a1a80;
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
                 color: white;
                 padding: 20px;
                 border-radius: 10px;
@@ -123,11 +124,11 @@
     // 获取设置项标签
     function getSettingLabel(key) {
         const labels = {
-            enableBaseTransition: '基础过渡效果',
-            enableLinkUnderline: '超链接下划线动画',
-            enableLeftMenu: '左侧菜单美化',
-            enableTopMenu: '顶部菜单栏美化',
-            enableTableRowHover: '表格行悬停效果'
+            enableBaseTransition: '基础特效',
+            enableLinkUnderline: '超链接下划线特效',
+            enableLeftMenu: '左侧菜单特效',
+            enableTopMenu: '顶部菜单栏现代化',
+            enableTableRowHover: '表格行悬停特效'
         };
         return labels[key] || key;
     }
