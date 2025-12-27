@@ -5,7 +5,7 @@
 // @namespace    lunzhiPenxil
 // @repository   https://github.com/lunzhiPenxil/WoDBeautify
 // @license      AGPL3
-// @version      2025.12.28.7
+// @version      2025.12.28.8
 // @include      http*://*.world-of-dungeons.org/*
 // @grant        GM_addStyle
 // @grant        GM_getValue
@@ -352,7 +352,7 @@
             }
 
             #gadgettable-top .background {
-                background-color: #1a1a1a80
+                background-color: #1a1a1a80;
                 backdrop-filter: blur(10px);
                 -webkit-backdrop-filter: blur(10px);
                 box-shadow: 0px 0px 20px -4px #000000;
