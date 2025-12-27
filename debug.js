@@ -6,6 +6,9 @@
 // @version      dev
 // @include      http*://*.world-of-dungeons.org/*
 // @grant        GM_addStyle
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_registerMenuCommand
 // @run-at       document-end
 // @require      file:///D:/path/to/your/WoDBeautify.js
 // ==/UserScript==

@@ -5,281 +5,458 @@
 // @namespace    lunzhiPenxil
 // @repository   https://github.com/lunzhiPenxil/WoDBeautify
 // @license      AGPL3
-// @version      2025.12.28.1
+// @version      2025.12.28.2
 // @include      http*://*.world-of-dungeons.org/*
 // @grant        GM_addStyle
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_registerMenuCommand
 // @run-at       document-end
 // @downloadURL  https://update.greasyfork.org/scripts/560353/WoD%20%E7%BE%8E%E5%8C%96.user.js
 // @updateURL    https://update.greasyfork.org/scripts/560353/WoD%20%E7%BE%8E%E5%8C%96.meta.js
 // ==/UserScript==
 
 (function() {
-    const baseCSS = /*css*/ `
-        /* == 基础过渡 == */
-        * {
-            transition: all 300ms;
-        }
+    // 默认设置
+    const defaultSettings = {
+        enableBaseTransition: true,
+        enableLinkUnderline: true,
+        enableLeftMenu: true,
+        enableTopMenu: true,
+        enableTableRowHover: true
+    };
 
-        .content_table * {
-            transition: all 300ms;
+    // 加载设置
+    function loadSettings() {
+        const settings = {};
+        for (const key in defaultSettings) {
+            settings[key] = GM_getValue(key, defaultSettings[key]);
         }
+        return settings;
+    }
 
-        /* == 表格行高度过渡 == */
-        #gadgettable-center .content_table tr[class^="row"] {
-            position: relative;
-            transition: background-color 300ms ease;
+    // 保存设置
+    function saveSettings(settings) {
+        for (const key in settings) {
+            GM_setValue(key, settings[key]);
         }
+        // 重新加载CSS
+        applyStyles(settings);
+        alert('设置已保存，页面将重新应用样式！');
+    }
 
-        #gadgettable-center .content_table tr[class^="row"] td > :is(a, div, span) {
-            display: inline-block;
-            padding-top: 0 !important;
-            padding-bottom: 0 !important;
-            overflow: hidden !important;
-            transition: all 400ms cubic-bezier(0, 0, 0, 2) !important;
-            transition-property: max-height, padding-top, padding-bottom, opacity !important;
-            vertical-align: top;
-            box-sizing: border-box !important;
-        }
+    // 显示设置对话框
+    function showSettingsDialog() {
+        const settings = loadSettings();
+        
+        let dialog = document.createElement('div');
+        dialog.innerHTML = /*html*/ `
+            <div style="
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #1a1a1a;
+                color: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 5px 30px rgba(0,0,0,0.5);
+                z-index: 10000;
+                min-width: 300px;
+                font-family: Arial, sans-serif;
+            ">
+                <h3 style="margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px;">WoD 美化设置</h3>
+                <div style="margin: 15px 0;">
+                    ${Object.keys(settings).map(key => `
+                        <label style="display: flex; align-items: center; margin: 10px 0; cursor: pointer;">
+                            <input type="checkbox" id="${key}" ${settings[key] ? 'checked' : ''} 
+                                   style="margin-right: 10px;">
+                            <span>${getSettingLabel(key)}</span>
+                        </label>
+                    `).join('')}
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                    <button id="saveBtn" style="
+                        background: #4CAF50;
+                        color: white;
+                        border: none;
+                        padding: 8px 16px;
+                        border-radius: 4px;
+                        cursor: pointer;
+                    ">保存设置</button>
+                    <button id="closeBtn" style="
+                        background: #666;
+                        color: white;
+                        border: none;
+                        padding: 8px 16px;
+                        border-radius: 4px;
+                        cursor: pointer;
+                    ">关闭</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(dialog);
+        
+        // 事件监听
+        dialog.querySelector('#saveBtn').addEventListener('click', () => {
+            const newSettings = {};
+            Object.keys(settings).forEach(key => {
+                newSettings[key] = dialog.querySelector(`#${key}`).checked;
+            });
+            saveSettings(newSettings);
+            document.body.removeChild(dialog);
+        });
+        
+        dialog.querySelector('#closeBtn').addEventListener('click', () => {
+            document.body.removeChild(dialog);
+        });
+        
+        // 点击背景关闭
+        dialog.addEventListener('click', (e) => {
+            if (e.target === dialog) {
+                document.body.removeChild(dialog);
+            }
+        });
+    }
 
-        #gadgettable-center:not(:has(input[name="report_id[0]"])) .content_table tr[class^="row"]:is(:hover, .expanded) td > :is(a, div, span) {
-            max-height: 120px !important;
-            padding-top: 8px !important;
-            padding-bottom: 8px !important;
-        }
+    // 获取设置项标签
+    function getSettingLabel(key) {
+        const labels = {
+            enableBaseTransition: '基础过渡效果',
+            enableLinkUnderline: '超链接下划线动画',
+            enableLeftMenu: '左侧菜单美化',
+            enableTopMenu: '顶部菜单栏美化',
+            enableTableRowHover: '表格行悬停效果'
+        };
+        return labels[key] || key;
+    }
 
-        #gadgettable-center .content_table tr[class^="row"] td {
-            position: relative;
-        }
+    // CSS片段定义
+    const cssFragments = {
+        baseTransition: /*css*/ `
+            /* == 基础过渡 == */
+            * {
+                transition: all 300ms;
+            }
+        `,
 
-        #gadgettable-center .content_table tr[class^="row"] td::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: transparent;
-            transition: background-color 300ms ease;
-            z-index: -1;
-            pointer-events: none;
-        }
+        tableRowHover: /*css*/ `
+            /* == 表格行高度过渡 == */
+            .content_table * {
+                transition: all 300ms;
+            }
 
-        #gadgettable-center .content_table tr[class^="row"]:hover td::after {
-            background-color: rgba(102, 126, 234, 0.05);
-        }
+            #gadgettable-center .content_table tr[class^="row"] {
+                position: relative;
+                transition: background-color 300ms ease;
+            }
 
-        /* == 超链接下划线动画 == */
-        :is(
-            .gadget.main_content.popup,
-            .content_table,
-            #gadgettable-top,
+            #gadgettable-center .content_table tr[class^="row"] td > :is(a, div, span) {
+                display: inline-block;
+                padding-top: 0 !important;
+                padding-bottom: 0 !important;
+                overflow: hidden !important;
+                transition: all 400ms cubic-bezier(0, 0, 0, 2) !important;
+                transition-property: max-height, padding-top, padding-bottom, opacity !important;
+                vertical-align: top;
+                box-sizing: border-box !important;
+            }
+
+            #gadgettable-center:not(:has(input[name="report_id[0]"])) .content_table tr[class^="row"]:is(:hover, .expanded) td > :is(a, div, span) {
+                max-height: 120px !important;
+                padding-top: 8px !important;
+                padding-bottom: 8px !important;
+            }
+
+            #gadgettable-center .content_table tr[class^="row"] td {
+                position: relative;
+            }
+
+            #gadgettable-center .content_table tr[class^="row"] td::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: transparent;
+                transition: background-color 300ms ease;
+                z-index: -1;
+                pointer-events: none;
+            }
+
+            #gadgettable-center .content_table tr[class^="row"]:hover td::after {
+                background-color: rgba(102, 126, 234, 0.05);
+            }
+        `,
+
+        linkUnderline: /*css*/ `
+            /* == 超链接下划线动画 == */
+            :is(
+                .gadget.main_content.popup,
+                .content_table,
+                #gadgettable-top,
+                #gadgettable-left,
+                #gadgettable-center,
+                #gadgettable-right
+            ) a:not(:has(:is(
+                span.prevHeroLinkImageLeft,
+                span.nextHeroLinkImageRight,
+                span.font_Hero_Name
+            ))) {
+                position: relative !important;
+                width: max-content;
+                padding: 0;
+                transition: color 200ms, transform 350ms cubic-bezier(0, 0, 0, 2);
+            }
+
+            :is(
+                .gadget.main_content.popup,
+                .content_table,
+                #gadgettable-top,
+                #gadgettable-left,
+                #gadgettable-center,
+                #gadgettable-right
+            ) a:not(:has(:is(
+                span.prevHeroLinkImageLeft,
+                span.nextHeroLinkImageRight,
+                span.font_Hero_Name
+            )))::after {
+                content: "";
+                position: absolute;
+                bottom: 0px;
+                left: 100%;
+                width: 0;
+                height: 1px;
+                background: #ffffff;
+                transition: width 350ms, left 350ms;
+            }
+
+            :is(
+                .gadget.main_content.popup,
+                .content_table,
+                #gadgettable-top,
+                #gadgettable-center,
+                #gadgettable-right
+            ) a:not(:has(:is(
+                span.prevHeroLinkImageLeft,
+                span.nextHeroLinkImageRight,
+                span.font_Hero_Name
+            )))::after {
+                height: 1px;
+            }
+
+            :is(
+                .gadget.main_content.popup,
+                .content_table,
+                #gadgettable-top,
+                #gadgettable-left,
+                #gadgettable-center,
+                #gadgettable-right
+            ) a:not(:has(:is(
+                span.prevHeroLinkImageLeft,
+                span.nextHeroLinkImageRight,
+                span.font_Hero_Name
+            ))):hover::after {
+                left: 0;
+                width: 100%;
+                transition: width 350ms, left 0ms;
+            }
+
+            #gadgettable-left a span {
+                transform: translateX(20px);
+                transition: 350ms cubic-bezier(0, 0, 0, 2);
+                transition-delay: 100ms;
+            }
+
+            #gadgettable-left a:hover span {
+                transform: translateX(24px);
+            }
+
+            .changeHeroLink::after {
+                display: none;
+            }
+        `,
+
+        leftMenu: /*css*/ `
+            /* == 左侧菜单自适应，flex化 == */
+            #gadgettable-left * {
+                transition: all 300ms;
+            }
+
+            #gadgettable-left a:hover {
+                transform: translateX(20%) scale(1.5);
+            }
+
+            #gadgettable-left #gadgettable-left-gadgets {
+                padding-left: 0;
+            }
+
+            #gadgettable-left .gadget_scroll .menu-vertical {
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            #gadgettable-left .gadget_scroll .menu-vertical .menu-0-body {
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            #gadgettable-left .gadget_scroll .menu-vertical .menu-0-body > * {
+                overflow: hidden;
+                box-sizing: border-box;
+            }
+
+            #gadgettable-left .gadget_scroll .menu-vertical .menu-1 {
+                padding-bottom: 8px;
+                padding-left: 8px;
+            }
+
+            #gadgettable-left .gadget_scroll .menu-vertical .menu-1:has(.menu-1-body) {
+                padding-bottom: 0;
+            }
+
+            #gadgettable-left .gadget_scroll .menu-vertical .menu-1:has(.menu-1-caption) .menu-1-body {
+                display: block !important;
+                padding: 0;
+                padding-top: 8px;
+                padding-left: 0;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 300ms ease, padding 800ms ease-out;
+            }
+
+            #gadgettable-left .gadget_scroll .menu-vertical .menu-1:has(.menu-1-caption.selected) .menu-1-body {
+                max-height: 700px;
+                padding-left: 8px;
+            }
+
+            .menu-1-arrow,
+            .menu-2-arrow {
+                display: none; /* 暂时禁用原生的下拉菜单箭头 */
+            }
+
+            .menu-2 .menu-2-body {
+                display: block !important; /* 原生的逻辑在这块有问题，这里强制展示 */
+            }
+
+            .menu-1-arrow.open,
+            .menu-2-arrow.closed.open {
+                background: url(https://delta.world-of-dungeons.org/wod/css//skins/skin-8/images/page/navigate_down.png) no-repeat;
+            }
+
+            .menu-1,
+            .menu-2 {
+                position: relative !important;
+            }
+
+            :is(
+                .menu-1:has(.menu-1-body),
+                .menu-2:has(.menu-2-body)
+            )::after {
+                position: absolute;
+                display: block;
+                content: "";
+                background: url(https://delta.world-of-dungeons.org/wod/css//skins/skin-8/images/page/navigate_right.png) no-repeat;
+                top: 5px;
+                right: 8px;
+                height: 16px;
+                width: 16px;
+                transition: transform 300ms cubic-bezier(0, 0, 0, 1.5);
+            }
+
+            :is(
+                .menu-1:has(.menu-1-body):has(.menu-1-caption.selected),
+                .menu-2:has(.menu-2-body):has(.menu-2-caption) /* 前面已经强制全部情况都是展开了，所以这里也是 */
+            )::after {
+                transform: rotate(90deg);
+            }
+        `,
+
+        topMenu: /*css*/ `
+            /* == 顶部菜单栏 == */
+            #gadgettable-top {
+                position: fixed;
+                z-index: 999;
+                width: 100%;
+            }
+
+            #gadgettable-top .background {
+                background-color: #00000000;
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                box-shadow: 0px 5px 10px 0px #000000;
+            }
+
+            #gadgettable-top :is(
+                .border-top,
+                .border-bottom,
+                .border-left,
+                .border-right
+            ) {
+                display: none;
+            }
+
+            #gadgettable-top .gadget_scroll {
+                overflow-y: hidden;
+            }
+
             #gadgettable-left,
             #gadgettable-center,
-            #gadgettable-right
-        ) a:not(:has(:is(
-            span.prevHeroLinkImageLeft,
-            span.nextHeroLinkImageRight,
-            span.font_Hero_Name
-        ))) {
-            position: relative !important;
-            width: max-content;
-            padding: 0;
-            transition: color 200ms, transform 350ms cubic-bezier(0, 0, 0, 2);
-        }
+            #gadgettable-right {
+                padding-top: 20px;
+            }
+        `
+    };
 
-        :is(
-            .gadget.main_content.popup,
-            .content_table,
-            #gadgettable-top,
-            #gadgettable-left,
-            #gadgettable-center,
-            #gadgettable-right
-        ) a:not(:has(:is(
-            span.prevHeroLinkImageLeft,
-            span.nextHeroLinkImageRight,
-            span.font_Hero_Name
-        )))::after {
-            content: "";
-            position: absolute;
-            bottom: 0px;
-            left: 100%;
-            width: 0;
-            height: 1px;
-            background: #ffffff;
-            transition: width 350ms, left 350ms;
+    // 应用CSS样式
+    function applyStyles(settings) {
+        let css = '';
+        
+        if (settings.enableBaseTransition) {
+            css += cssFragments.baseTransition;
         }
-
-        :is(
-            .gadget.main_content.popup,
-            .content_table,
-            #gadgettable-top,
-            #gadgettable-center,
-            #gadgettable-right
-        ) a:not(:has(:is(
-            span.prevHeroLinkImageLeft,
-            span.nextHeroLinkImageRight,
-            span.font_Hero_Name
-        )))::after {
-            height: 1px;
+        
+        if (settings.enableTableRowHover) {
+            css += cssFragments.tableRowHover;
         }
-
-        :is(
-            .gadget.main_content.popup,
-            .content_table,
-            #gadgettable-top,
-            #gadgettable-left,
-            #gadgettable-center,
-            #gadgettable-right
-        ) a:not(:has(:is(
-            span.prevHeroLinkImageLeft,
-            span.nextHeroLinkImageRight,
-            span.font_Hero_Name
-        ))):hover::after {
-            left: 0;
-            width: 100%;
-            transition: width 350ms, left 0ms;
+        
+        if (settings.enableLinkUnderline) {
+            css += cssFragments.linkUnderline;
         }
-
-        #gadgettable-left a span {
-            transform: translateX(20px);
-            transition: 350ms cubic-bezier(0, 0, 0, 2);
-            transition-delay: 100ms;
+        
+        if (settings.enableLeftMenu) {
+            css += cssFragments.leftMenu;
         }
-
-        #gadgettable-left a:hover span {
-            transform: translateX(24px);
+        
+        if (settings.enableTopMenu) {
+            css += cssFragments.topMenu;
         }
-
-        .changeHeroLink::after {
-            display: none;
+        
+        // 移除旧的样式
+        const oldStyle = document.getElementById('wod-beautify-style');
+        if (oldStyle) {
+            oldStyle.remove();
         }
-
-        /* == 左侧菜单自适应，flex化 == */
-        #gadgettable-left a:hover {
-            transform: translateX(20%) scale(1.5);
+        
+        // 添加新的样式
+        if (css.trim()) {
+            const style = document.createElement('style');
+            style.id = 'wod-beautify-style';
+            style.textContent = css;
+            document.head.appendChild(style);
         }
+    }
 
-        #gadgettable-left #gadgettable-left-gadgets {
-            padding-left: 10px;
-        }
-
-        #gadgettable-left .gadget_scroll .menu-vertical {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        #gadgettable-left .gadget_scroll .menu-vertical .menu-0-body {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        #gadgettable-left .gadget_scroll .menu-vertical .menu-0-body > * {
-            overflow: hidden;
-            box-sizing: border-box;
-        }
-
-        #gadgettable-left .gadget_scroll .menu-vertical .menu-1 {
-            padding-bottom: 8px;
-            padding-left: 4px;
-        }
-
-        #gadgettable-left .gadget_scroll .menu-vertical .menu-1:has(.menu-1-body) {
-            padding-bottom: 0;
-        }
-
-        #gadgettable-left .gadget_scroll .menu-vertical .menu-1:has(.menu-1-caption) .menu-1-body {
-            display: block !important;
-            padding: 0;
-            padding-top: 8px;
-            padding-left: 0;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 400ms ease, padding 300ms ease;
-        }
-
-        #gadgettable-left .gadget_scroll .menu-vertical .menu-1:has(.menu-1-caption.selected) .menu-1-body {
-            max-height: 700px;
-            padding-left: 8px;
-        }
-
-        .menu-1-arrow,
-        .menu-2-arrow {
-            display: none; /* 暂时禁用原生的下拉菜单箭头 */
-        }
-
-        .menu-2 .menu-2-body {
-            display: block !important; /* 原生的逻辑在这块有问题，这里强制展示 */
-        }
-
-        .menu-1-arrow.open,
-        .menu-2-arrow.closed.open {
-            background: url(https://delta.world-of-dungeons.org/wod/css//skins/skin-8/images/page/navigate_down.png) no-repeat;
-        }
-
-        .menu-1,
-        .menu-2 {
-            position: relative !important;
-        }
-
-        :is(
-            .menu-1:has(.menu-1-body),
-            .menu-2:has(.menu-2-body)
-        )::after {
-            position: absolute;
-            display: block;
-            content: "";
-            background: url(https://delta.world-of-dungeons.org/wod/css//skins/skin-8/images/page/navigate_right.png) no-repeat;
-            top: 5px;
-            right: 8px;
-            height: 16px;
-            width: 16px;
-            transition: transform 300ms cubic-bezier(0, 0, 0, 2);
-        }
-
-        :is(
-            .menu-1:has(.menu-1-body):has(.menu-1-caption.selected),
-            .menu-2:has(.menu-2-body):has(.menu-2-caption) /* 前面已经强制全部情况都是展开了，所以这里也是 */
-        )::after {
-            transform: rotate(90deg);
-        }
-
-        /* == 顶部菜单栏 == */
-        #gadgettable-top {
-            position: fixed;
-            z-index: 999;
-            width: 100%;
-        }
-
-        #gadgettable-top .background {
-            background-color: #00000000;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0px 5px 10px 0px #000000;
-        }
-
-        #gadgettable-top :is(
-            .border-top,
-            .border-bottom,
-            .border-left,
-            .border-right
-        ) {
-            display: none;
-        }
-
-        #gadgettable-top .gadget_scroll {
-            overflow-y: hidden;
-        }
-
-        #gadgettable-left,
-        #gadgettable-center,
-        #gadgettable-right {
-            padding-top: 20px;
-        }
-    `;
-
-    GM_addStyle(baseCSS);
+    // 初始化
+    const settings = loadSettings();
+    applyStyles(settings);
+    
+    // 注册菜单命令
+    GM_registerMenuCommand('⚙️ WoD 美化设置', showSettingsDialog);
 
     // 一次性初始化函数
     function initMenuStatesOnce() {
