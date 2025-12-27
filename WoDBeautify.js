@@ -5,7 +5,7 @@
 // @namespace    lunzhiPenxil
 // @repository   https://github.com/lunzhiPenxil/WoDBeautify
 // @license      AGPL3
-// @version      2025.12.28.2
+// @version      2025.12.28.3
 // @include      http*://*.world-of-dungeons.org/*
 // @grant        GM_addStyle
 // @grant        GM_getValue
@@ -23,7 +23,7 @@
         enableLinkUnderline: true,
         enableLeftMenu: true,
         enableTopMenu: true,
-        enableTableRowHover: true
+        enableTableRowHover: false
     };
 
     // 加载设置
@@ -197,7 +197,6 @@
                 .gadget.main_content.popup,
                 .content_table,
                 #gadgettable-top,
-                #gadgettable-left,
                 #gadgettable-center,
                 #gadgettable-right
             ) a:not(:has(:is(
@@ -215,7 +214,6 @@
                 .gadget.main_content.popup,
                 .content_table,
                 #gadgettable-top,
-                #gadgettable-left,
                 #gadgettable-center,
                 #gadgettable-right
             ) a:not(:has(:is(
@@ -251,7 +249,6 @@
                 .gadget.main_content.popup,
                 .content_table,
                 #gadgettable-top,
-                #gadgettable-left,
                 #gadgettable-center,
                 #gadgettable-right
             ) a:not(:has(:is(
@@ -264,16 +261,6 @@
                 transition: width 350ms, left 0ms;
             }
 
-            #gadgettable-left a span {
-                transform: translateX(20px);
-                transition: 350ms cubic-bezier(0, 0, 0, 2);
-                transition-delay: 100ms;
-            }
-
-            #gadgettable-left a:hover span {
-                transform: translateX(24px);
-            }
-
             .changeHeroLink::after {
                 display: none;
             }
@@ -283,6 +270,10 @@
             /* == 左侧菜单自适应，flex化 == */
             #gadgettable-left * {
                 transition: all 300ms;
+            }
+
+            #gadgettable-left a {
+                width: max-content;
             }
 
             #gadgettable-left a:hover {
@@ -378,6 +369,10 @@
 
         topMenu: /*css*/ `
             /* == 顶部菜单栏 == */
+            #gadgettable-top * {
+                transition: all 300ms;
+            }
+
             #gadgettable-top {
                 position: fixed;
                 z-index: 999;
