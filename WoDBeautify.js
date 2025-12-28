@@ -5,7 +5,7 @@
 // @namespace    lunzhiPenxil
 // @repository   https://github.com/lunzhiPenxil/WoDBeautify
 // @license      AGPL3
-// @version      2025.12.28.8
+// @version      2025.12.29.1
 // @include      http*://*.world-of-dungeons.org/*
 // @grant        GM_addStyle
 // @grant        GM_getValue
@@ -49,49 +49,19 @@
         
         let dialog = document.createElement('div');
         dialog.innerHTML = /*html*/ `
-            <div style="
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: #1a1a1a80;
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
-                color: white;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 5px 30px rgba(0,0,0,0.5);
-                z-index: 10000;
-                min-width: 300px;
-                font-family: Arial, sans-serif;
-            ">
-                <h3 style="margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px;">WoD 美化设置</h3>
-                <div style="margin: 15px 0;">
+            <div class="WoDBeautifyConfig">
+                <h3 class="title">WoD 美化设置</h3>
+                <div class="config">
                     ${Object.keys(settings).map(key => `
-                        <label style="display: flex; align-items: center; margin: 10px 0; cursor: pointer;">
-                            <input type="checkbox" id="${key}" ${settings[key] ? 'checked' : ''} 
-                                   style="margin-right: 10px;">
+                        <label class="configLable">
+                            <input type="checkbox" id="${key}" ${settings[key] ? 'checked' : ''}>
                             <span>${getSettingLabel(key)}</span>
                         </label>
                     `).join('')}
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                    <button id="saveBtn" style="
-                        background: #4CAF50;
-                        color: white;
-                        border: none;
-                        padding: 8px 16px;
-                        border-radius: 4px;
-                        cursor: pointer;
-                    ">保存设置</button>
-                    <button id="closeBtn" style="
-                        background: #666;
-                        color: white;
-                        border: none;
-                        padding: 8px 16px;
-                        border-radius: 4px;
-                        cursor: pointer;
-                    ">关闭</button>
+                <div class="buttonBox">
+                    <button id="saveBtn">保存设置</button>
+                    <button id="closeBtn">关闭</button>
                 </div>
             </div>
         `;
@@ -133,6 +103,108 @@
 
     // CSS片段定义
     const cssFragments = {
+        buildInCSS: /*css*/ `
+            /* == 配置菜单自用的 CSS == */
+            @keyframes popupFadeIn {
+                from {
+                    opacity: 0;
+                    transform: translate(-50%, -50%) scale(0.8);
+                }
+                70% {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1.05);
+                }
+                to {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1);
+                }
+            }
+
+            @keyframes pulse {
+                from {
+                    transform: scale3d(1, 1, 1);
+                }
+                50% {
+                    transform: scale3d(1.05, 1.05, 1.05);
+                }
+                to {
+                    transform: scale3d(1, 1, 1);
+                }
+            }
+            
+            div.WoDBeautifyConfig {
+                position: fixed;
+                z-index: 10000;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #1a1a1a80;
+                color: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 5px 30px rgba(0,0,0,0.5);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                min-width: 300px;
+                font-family: Arial, sans-serif;
+                animation: popupFadeIn 600ms ease-out forwards;
+                transition: all 300ms;
+            }
+
+            div.WoDBeautifyConfig h3.title {
+                margin-top: 0;
+                border-bottom: 1px solid #333;
+                padding-bottom: 10px;
+            }
+
+            div.WoDBeautifyConfig div.config {
+                margin: 15px 0;
+            }
+
+            div.WoDBeautifyConfig div.config label.configLable {
+                display: flex;
+                align-items: center;
+                margin: 10px 0;
+                cursor: pointer;
+            }
+
+            div.WoDBeautifyConfig div.config label.configLable input {
+                margin-right: 10px;
+            }
+
+            div.WoDBeautifyConfig div.buttonBox {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 20px;
+            }
+
+            div.WoDBeautifyConfig div.buttonBox button#saveBtn {
+                background: #4CAF50;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            div.WoDBeautifyConfig div.buttonBox button#closeBtn {
+                background: #666;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            div.WoDBeautifyConfig div.buttonBox :is(
+                button#saveBtn,
+                button#closeBtn
+            ):hover {
+                filter: brightness(120%);
+                animation: pulse 500ms ease forwards;
+            }
+        `,
+    
         baseTransition: /*css*/ `
             /* == 基础过渡 == */
             * {
@@ -382,6 +454,8 @@
     // 应用CSS样式
     function applyStyles(settings) {
         let css = '';
+
+        css += cssFragments.buildInCSS;
         
         if (settings.enableBaseTransition) {
             css += cssFragments.baseTransition;
