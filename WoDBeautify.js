@@ -5,7 +5,7 @@
 // @namespace    lunzhiPenxil
 // @repository   https://github.com/lunzhiPenxil/WoDBeautify
 // @license      AGPL3
-// @version      2025.12.30.1
+// @version      2025.12.30.2
 // @include      http*://*.world-of-dungeons.org/*
 // @grant        GM_addStyle
 // @grant        GM_getValue
@@ -105,19 +105,30 @@
     const cssFragments = {
         buildInCSS: /*css*/ `
             /* == 配置菜单自用的 CSS == */
-            @keyframes popupFadeIn {
-                from {
-                    opacity: 0;
-                    transform: translate(-50%, -50%) scale(0.8);
-                }
-                70% {
-                    opacity: 1;
-                    transform: translate(-50%, -50%) scale(1.05);
-                }
-                to {
-                    opacity: 1;
-                    transform: translate(-50%, -50%) scale(1);
-                }
+            @keyframes flipInX {
+              from {
+                transform: translate(-50%, -50%) perspective(400px) rotate3d(1, 0, 0, 90deg);
+                animation-timing-function: ease-in;
+                opacity: 0;
+              }
+          
+              40% {
+                transform: translate(-50%, -50%) perspective(400px) rotate3d(1, 0, 0, -20deg);
+                animation-timing-function: ease-in;
+              }
+          
+              60% {
+                transform: translate(-50%, -50%) perspective(400px) rotate3d(1, 0, 0, 10deg);
+                opacity: 1;
+              }
+          
+              80% {
+                transform: translate(-50%, -50%) perspective(400px) rotate3d(1, 0, 0, -5deg);
+              }
+          
+              to {
+                transform: translate(-50%, -50%) perspective(400px);
+              }
             }
 
             @keyframes pulse {
@@ -131,7 +142,7 @@
                     transform: scale3d(1, 1, 1);
                 }
             }
-            
+
             div.WoDBeautifyConfig {
                 position: fixed;
                 z-index: 10000;
@@ -147,7 +158,7 @@
                 -webkit-backdrop-filter: blur(10px);
                 min-width: 300px;
                 font-family: Arial, sans-serif;
-                animation: popupFadeIn 600ms ease-out forwards;
+                animation: flipInX 600ms ease-out forwards;
                 transition: all 300ms;
             }
 
