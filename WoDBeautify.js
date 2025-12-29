@@ -5,7 +5,7 @@
 // @namespace    lunzhiPenxil
 // @repository   https://github.com/lunzhiPenxil/WoDBeautify
 // @license      AGPL3
-// @version      2025.12.29.1
+// @version      2025.12.30.1
 // @include      http*://*.world-of-dungeons.org/*
 // @grant        GM_addStyle
 // @grant        GM_getValue
@@ -142,7 +142,7 @@
                 color: white;
                 padding: 20px;
                 border-radius: 10px;
-                box-shadow: 0 5px 30px rgba(0,0,0,0.5);
+                box-shadow: 0px 30px 40px 10px rgba(0, 0, 0, 0.5);
                 backdrop-filter: blur(10px);
                 -webkit-backdrop-filter: blur(10px);
                 min-width: 300px;
