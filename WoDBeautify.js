@@ -5,7 +5,7 @@
 // @namespace    lunzhiPenxil
 // @repository   https://github.com/lunzhiPenxil/WoDBeautify
 // @license      AGPL3
-// @version      2026.1.6.1
+// @version      2026.1.6.2
 // @include      http*://*.world-of-dungeons.org/*
 // @grant        GM_addStyle
 // @grant        GM_getValue
@@ -472,14 +472,14 @@
         const totalTime = itemCount * (stayTime + scrollTime);
         let css = `@keyframes ticker-dynamic {`;
         css += `0% { transform: translateY(20px); }`;
-        css += `0.01% { transform: translateY(-1px); }`;
+        css += `${((scrollTime / totalTime) * 100).toFixed(2)}% { transform: translateY(-1px); }`;
 
         for (let i = 0; i <= itemCount; i++) {
             const startPercent = ((i * (stayTime + scrollTime) + stayTime) / totalTime) * 100;
             const endPercent = ((i + 1) * (stayTime + scrollTime) / totalTime) * 100;
             const pos = -i * itemHeight - 1;
             const nextPos = i === itemCount ? -1 : pos - itemHeight;
-            css += `${(startPercent + 0.01).toFixed(2)}% { transform: translateY(${pos}px); }`;
+            css += `${(startPercent).toFixed(2)}% { transform: translateY(${pos}px); }`;
             css += `${(endPercent - 0.01).toFixed(2)}% { transform: translateY(${nextPos}px); }`;
         }
         css += `100% { transform: translateY(20px); }}`;
