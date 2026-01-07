@@ -5,7 +5,7 @@
 // @namespace    lunzhiPenxil
 // @repository   https://github.com/lunzhiPenxil/WoDBeautify
 // @license      AGPL3
-// @version      2026.1.6.2
+// @version      2026.1.7.1
 // @include      http*://*.world-of-dungeons.org/*
 // @grant        GM_addStyle
 // @grant        GM_getValue
@@ -22,7 +22,8 @@
         enableBaseTransition: true,
         enableLinkUnderline: true,
         enableLeftMenu: true,
-        enableTopMenu: true
+        enableTopMenu: true,
+        enableCenterTable: true
     };
 
     // 加载设置
@@ -96,7 +97,8 @@
             enableBaseTransition: '基础特效',
             enableLinkUnderline: '超链接下划线特效',
             enableLeftMenu: '左侧菜单特效',
-            enableTopMenu: '顶部菜单栏现代化'
+            enableTopMenu: '顶部菜单栏现代化',
+            enableCenterTable: '表格交互现代化'
         };
         return labels[key] || key;
     }
@@ -464,6 +466,60 @@
                 display: block !important;
                 height: 21px;
             }
+
+            .page_bg_with_image {
+                background-attachment: fixed;
+                background-repeat: no-repeat;
+                background-size: cover;
+                background-position: center;
+            }
+        `,
+
+        centerTable: /*css*/ `
+            table.content_table > * > :is(
+                tr.header,
+                tr.row0,
+                tr.row1
+            ) {
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                transition: all 300ms;
+                transition-timing-function: cubic-bezier(0, 0, 1, 1);
+            }
+            
+            table.content_table > * > :is(
+                tr.header,
+                tr.row0,
+                tr.row1
+            ):hover {
+                transition-timing-function: cubic-bezier(0, 1, 0, 1);
+            }
+
+            table.content_table > * > tr.row0 {
+                background-color: #10101080;
+            }
+
+            table.content_table > * > tr.row1 {
+                background-color: #30303080;
+            }
+
+            table.content_table > * > tr.header {
+                background-color: #40404080;
+            }
+
+            table.content_table > * > tr.row0:hover,
+            table.content_table > * > tr.row1:hover {
+                background-color: #000000a0;
+            }
+
+            table.content_table > * > tr.header:hover {
+                background-color: #404040a0;
+            }
+
+            .table_hl,
+            .table_hl_sorted {
+                background-color: #40404000;
+            }
         `
     };
 
@@ -480,9 +536,9 @@
             const pos = -i * itemHeight - 1;
             const nextPos = i === itemCount ? -1 : pos - itemHeight;
             css += `${(startPercent).toFixed(2)}% { transform: translateY(${pos}px); }`;
-            css += `${(endPercent - 0.01).toFixed(2)}% { transform: translateY(${nextPos}px); }`;
+            css += `${(endPercent).toFixed(2)}% { transform: translateY(${nextPos}px); }`;
         }
-        css += `100% { transform: translateY(20px); }}`;
+        css += `}`;
         css += /*css*/ `
             #gadgettable-top .gadget.ticker .gadget_body {
                 animation: ticker-dynamic ${totalTime}s linear infinite;
@@ -516,6 +572,10 @@
         
         if (settings.enableTopMenu) {
             css += cssFragments.topMenu;
+        }
+        
+        if (settings.enableCenterTable) {
+            css += cssFragments.centerTable;
         }
         
         // 移除旧的样式
