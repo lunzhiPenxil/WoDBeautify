@@ -5,7 +5,7 @@
 // @namespace    lunzhiPenxil
 // @repository   https://github.com/lunzhiPenxil/WoDBeautify
 // @license      AGPL3
-// @version      2026.1.7.1
+// @version      2026.1.7.2
 // @include      http*://*.world-of-dungeons.org/*
 // @grant        GM_addStyle
 // @grant        GM_getValue
@@ -23,7 +23,8 @@
         enableLinkUnderline: true,
         enableLeftMenu: true,
         enableTopMenu: true,
-        enableCenterTable: true
+        enableCenterTable: true,
+        enableCenterHints: true
     };
 
     // 加载设置
@@ -98,7 +99,8 @@
             enableLinkUnderline: '超链接下划线特效',
             enableLeftMenu: '左侧菜单特效',
             enableTopMenu: '顶部菜单栏现代化',
-            enableCenterTable: '表格交互现代化'
+            enableCenterTable: '表格交互现代化',
+            enableCenterHints: '底部提示框现代化'
         };
         return labels[key] || key;
     }
@@ -520,6 +522,26 @@
             .table_hl_sorted {
                 background-color: #40404000;
             }
+        `,
+
+        centerHints: /*css*/ `
+            .hints > .background {
+                background: #ffdba180 !important;
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                transition: all 300ms;
+            }
+
+            .hints:hover > .background {
+                background: #ffdba1c0 !important;
+            }
+
+            .hints > :is(
+                .border-left,
+                .border-right
+            ) {
+                background: none !important;
+            }
         `
     };
 
@@ -576,6 +598,10 @@
         
         if (settings.enableCenterTable) {
             css += cssFragments.centerTable;
+        }
+        
+        if (settings.enableCenterHints) {
+            css += cssFragments.centerHints;
         }
         
         // 移除旧的样式
