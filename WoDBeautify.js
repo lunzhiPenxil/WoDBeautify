@@ -5,7 +5,7 @@
 // @namespace    lunzhiPenxil
 // @repository   https://github.com/lunzhiPenxil/WoDBeautify
 // @license      AGPL3
-// @version      2026.1.7.3
+// @version      2026.1.8.1
 // @include      http*://*.world-of-dungeons.org/*
 // @grant        GM_addStyle
 // @grant        GM_getValue
@@ -478,7 +478,10 @@
         `,
 
         centerTable: /*css*/ `
+            /* == 游戏表格优化 == */
             table.content_table > * > :is(
+                tr.content_table_header,
+                tr.content_table_filter_row,
                 tr.header,
                 tr.row0,
                 tr.row1
@@ -505,22 +508,79 @@
                 background-color: #30303080;
             }
 
-            table.content_table > * > tr.header {
+            table.content_table > * > :is(
+                tr.content_table_header,
+                tr.content_table_filter_row,
+                tr.header
+            ) {
                 background-color: #40404080;
             }
 
-            table.content_table > * > tr.row0:hover,
-            table.content_table > * > tr.row1:hover {
+            table.content_table > * > :is(
+                tr.row0,
+                tr.row1
+            ):hover {
                 background-color: #000000a0;
-            }
-
-            table.content_table > * > tr.header:hover {
-                background-color: #404040a0;
             }
 
             .table_hl,
             .table_hl_sorted {
                 background-color: #40404000;
+            }
+
+            /* == 论坛表格优化 == */
+            TABLE.boardmain {
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                background-color: #60606000;
+            }
+
+            TABLE.boardmain * {
+                transition: all 300ms;
+            }
+
+            TR.boardhead {
+                background-color: #80808080;
+            }
+
+            TR.boardcategory {
+                background-color: #40404080;
+            }
+
+            TR.boardcategory > TD {
+                background-color: #10101080;
+            }
+
+            TR.boardcategory {
+                background-color: #00000000;
+            }
+
+            TR.boardforum,
+            TR.boardcon1,
+            TR.boardcon2 {
+                background-color: #40404080;
+            }
+
+            TR.boardforum:hover,
+            TR.boardcon1:hover,
+            TR.boardcon2:hover {
+                background-color: #404040e0;
+            }
+
+            TD.boardcon1 {
+                background-color: #00000080;
+            }
+
+            TD.boardcon1:hover {
+                background-color: #000000e0;
+            }
+
+            TD.boardcon2 {
+                background-color: #40404080;
+            }
+
+            TD.boardcon2:hover {
+                background-color: #404040e0;
             }
         `,
 
